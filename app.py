@@ -3,6 +3,7 @@ Smart Sales CLI - 메인 진입점
 """
 import sys
 import customer_service
+import sales_report_service
 
 
 def show_menu():
@@ -142,6 +143,80 @@ def handle_delete_customer():
         print(f"오류: {result}")
 
 
+def show_report_menu():
+    """영업일지 관리 하위 메뉴를 화면에 출력한다."""
+    print("\n" + "-" * 40)
+    print("        영업일지 관리")
+    print("-" * 40)
+    print("  1. 영업일지 등록")
+    print("  2. 영업일지 목록")
+    print("  3. 영업일지 수정")
+    print("  0. 뒤로 가기")
+    print("-" * 40)
+
+
+def handle_report_menu():
+    """영업일지 관리 하위 메뉴를 처리한다."""
+    while True:
+        show_report_menu()
+        choice = input("메뉴를 선택하세요: ").strip()
+
+        if choice == "0":
+            break
+        elif choice == "1":
+            handle_create_report()
+        elif choice == "2":
+            handle_list_reports()
+        elif choice == "3":
+            handle_update_report()
+        else:
+            print("잘못된 입력입니다. 0~3 사이의 숫자를 입력하세요.")
+
+
+def handle_create_report():
+    """영업일지 등록을 처리한다."""
+    print("\n--- 영업일지 등록 ---")
+    cid = input("고객사 ID: ").strip()
+    date = input("영업일 (YYYY-MM-DD): ").strip()
+    content = input("영업일지 내용: ").strip()
+
+    success, result = sales_report_service.create_report(cid, date, content)
+    if success:
+        r = result
+        print(f"등록 완료: {r['report_id']} - {r['customer_name']} ({r['date']})")
+    else:
+        print(f"오류: {result}")
+
+
+def handle_list_reports():
+    """영업일지 목록을 출력한다."""
+    reports = sales_report_service.get_all_reports()
+    if not reports:
+        print("\n등록된 영업일지가 없습니다.")
+        return
+    print("\n--- 영업일지 목록 ---")
+    print(f"{'ID':<6} {'고객사명':<16} {'날짜':<12} {'상태':<10} {'내용'}")
+    print("-" * 70)
+    for r in reports:
+        content_preview = r['content'][:30] + "..." if len(r['content']) > 30 else r['content']
+        print(f"{r['report_id']:<6} {r['customer_name']:<16} {r['date']:<12} {r['status']:<10} {content_preview}")
+
+
+def handle_update_report():
+    """영업일지 수정을 처리한다."""
+    print("\n--- 영업일지 수정 ---")
+    rid = input("영업일지 ID: ").strip()
+    date = input("새 영업일 (YYYY-MM-DD): ").strip()
+    content = input("새 영업일지 내용: ").strip()
+
+    success, result = sales_report_service.update_report(rid, date, content)
+    if success:
+        r = result
+        print(f"수정 완료: {r['report_id']} - {r['customer_name']} ({r['date']})")
+    else:
+        print(f"오류: {result}")
+
+
 def main():
     """CLI 메인 루프"""
     while True:
@@ -154,7 +229,7 @@ def main():
         elif choice == "1":
             handle_customer_menu()
         elif choice == "2":
-            print("[미구현] 영업일지 관리")
+            handle_report_menu()
         elif choice == "3":
             print("[미구현] 영업일지 결재")
         elif choice == "4":
