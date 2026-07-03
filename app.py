@@ -29,6 +29,7 @@ def show_customer_menu():
     print("  3. 고객사 상세 조회")
     print("  4. 고객사 수정")
     print("  5. 고객사 삭제")
+    print("  6. 고객사 검색")
     print("  0. 뒤로 가기")
     print("-" * 40)
 
@@ -51,8 +52,10 @@ def handle_customer_menu():
             handle_update_customer()
         elif choice == "5":
             handle_delete_customer()
+        elif choice == "6":
+            handle_search_customers()
         else:
-            print("잘못된 입력입니다. 0~5 사이의 숫자를 입력하세요.")
+            print("잘못된 입력입니다. 0~6 사이의 숫자를 입력하세요.")
 
 
 def handle_create_customer():
@@ -111,6 +114,21 @@ def handle_update_customer():
         print(f"수정 완료: {c['customer_id']} - {c['customer_name']}")
     else:
         print(f"오류: {result}")
+
+
+def handle_search_customers():
+    """고객사 검색을 처리한다."""
+    print("\n--- 고객사 검색 ---")
+    keyword = input("검색어: ").strip()
+    results = customer_service.search_customers(keyword)
+    if not results:
+        print("검색 결과가 없습니다.")
+        return
+    print(f"\n--- 검색 결과 ({len(results)}건) ---")
+    print(f"{'ID':<6} {'고객사명':<20} {'담당자':<10} {'이메일':<25}")
+    print("-" * 61)
+    for c in results:
+        print(f"{c['customer_id']:<6} {c['customer_name']:<20} {c['manager_name']:<10} {c['email']:<25}")
 
 
 def handle_delete_customer():
