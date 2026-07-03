@@ -4,6 +4,7 @@ Smart Sales CLI - 메인 진입점
 import sys
 import customer_service
 import sales_report_service
+import approval_service
 
 
 def show_menu():
@@ -217,6 +218,104 @@ def handle_update_report():
         print(f"오류: {result}")
 
 
+def show_approval_menu():
+    """영업일지 결재 하위 메뉴를 화면에 출력한다."""
+    print("\n" + "-" * 40)
+    print("        영업일지 결재")
+    print("-" * 40)
+    print("  1. 결재 요청 (submit)")
+    print("  2. 승인 (approve)")
+    print("  3. 반려 (reject)")
+    print("  4. 회수 (withdraw)")
+    print("  5. 상태 확인")
+    print("  0. 뒤로 가기")
+    print("-" * 40)
+
+
+def handle_approval_menu():
+    """영업일지 결재 하위 메뉴를 처리한다."""
+    while True:
+        show_approval_menu()
+        choice = input("메뉴를 선택하세요: ").strip()
+
+        if choice == "0":
+            break
+        elif choice == "1":
+            handle_submit_report()
+        elif choice == "2":
+            handle_approve_report()
+        elif choice == "3":
+            handle_reject_report()
+        elif choice == "4":
+            handle_withdraw_report()
+        elif choice == "5":
+            handle_get_report_status()
+        else:
+            print("잘못된 입력입니다. 0~5 사이의 숫자를 입력하세요.")
+
+
+def handle_submit_report():
+    """결재 요청을 처리한다."""
+    print("\n--- 결재 요청 ---")
+    rid = input("영업일지 ID: ").strip()
+    success, result = approval_service.submit_report(rid)
+    if success:
+        r = result
+        print(f"결재 요청 완료: {r['report_id']} (DRAFT → SUBMITTED)")
+    else:
+        print(f"오류: {result}")
+
+
+def handle_approve_report():
+    """승인을 처리한다."""
+    print("\n--- 승인 ---")
+    rid = input("영업일지 ID: ").strip()
+    success, result = approval_service.approve_report(rid)
+    if success:
+        r = result
+        print(f"승인 완료: {r['report_id']} (SUBMITTED → APPROVED)")
+    else:
+        print(f"오류: {result}")
+
+
+def handle_reject_report():
+    """반려를 처리한다."""
+    print("\n--- 반려 ---")
+    rid = input("영업일지 ID: ").strip()
+    success, result = approval_service.reject_report(rid)
+    if success:
+        r = result
+        print(f"반려 완료: {r['report_id']} (SUBMITTED → REJECTED)")
+    else:
+        print(f"오류: {result}")
+
+
+def handle_withdraw_report():
+    """결재 요청 회수를 처리한다."""
+    print("\n--- 결재 요청 회수 ---")
+    rid = input("영업일지 ID: ").strip()
+    success, result = approval_service.withdraw_report(rid)
+    if success:
+        r = result
+        print(f"회수 완료: {r['report_id']} (SUBMITTED → DRAFT)")
+    else:
+        print(f"오류: {result}")
+
+
+def handle_get_report_status():
+    """영업일지 상태를 확인한다."""
+    print("\n--- 상태 확인 ---")
+    rid = input("영업일지 ID: ").strip()
+    r = sales_report_service.get_report_by_id(rid)
+    if r:
+        print(f"영업일지 ID: {r['report_id']}")
+        print(f"고객사명: {r['customer_name']}")
+        print(f"날짜: {r['date']}")
+        print(f"상태: {r['status']}")
+    else:
+        print(f"영업일지 ID '{rid}'를 찾을 수 없습니다.")
+
+
 def main():
     """CLI 메인 루프"""
     while True:
@@ -231,7 +330,7 @@ def main():
         elif choice == "2":
             handle_report_menu()
         elif choice == "3":
-            print("[미구현] 영업일지 결재")
+            handle_approval_menu()
         elif choice == "4":
             print("[미구현] 고객사별 활동 요약")
         elif choice == "5":
