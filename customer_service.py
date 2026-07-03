@@ -31,6 +31,32 @@ def get_all_customers() -> list:
     return load_json(CUSTOMERS_FILE)
 
 
+def search_customers(keyword: str) -> list:
+    """검색어로 고객사를 검색한다. (고객사명, 담당자명, 이메일)
+
+    검색은 대소문자를 구분하지 않는다.
+    빈 문자열이나 공백만 있는 검색어는 빈 리스트를 반환한다.
+
+    Args:
+        keyword: 검색어
+
+    Returns:
+        검색 조건에 일치하는 고객사 리스트
+    """
+    if not keyword or not keyword.strip():
+        return []
+
+    keyword_lower = keyword.strip().lower()
+    customers = load_json(CUSTOMERS_FILE)
+    result = []
+    for c in customers:
+        if (keyword_lower in c.get("customer_name", "").lower()
+                or keyword_lower in c.get("manager_name", "").lower()
+                or keyword_lower in c.get("email", "").lower()):
+            result.append(c)
+    return result
+
+
 def get_customer_by_id(customer_id: str) -> dict | None:
     """고객사 ID로 단건 조회한다.
 
